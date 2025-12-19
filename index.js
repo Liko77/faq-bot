@@ -1,65 +1,62 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const axios = require('axios'); // AI istekleri için gerekli
-
-dotenv.config();
+const path = require('path');
+const { HfInference } = require('@huggingface/inference');
 
 const app = express();
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
+// PORT AYARI: Render'ın dinamik portunu kullanması için eklendi
 const PORT = process.env.PORT || 3000;
 
-// MONGODB BAĞLANTISI
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log("✅ MongoDB'ye başarıyla bağlanıldı!"))
-  .catch((err) => {
-    console.error("❌ MongoDB Bağlantı Hatası:", err.message);
-  });
+const MONGODB_URI = process.env.MONGODB_URI;
+const hf = new HfInference(process.env.HUGGING_FACE_KEY);
 
-// CHAT MODELİ
-const chatSchema = new mongoose.Schema({
-  userMessage: String,
-  botResponse: String,
-  date: { type: Date, default: Date.now }
-});
-const Chat = mongoose.model('Chat', chatSchema);
+const Chat = mongoose.model('Chat', new mongoose.Schema({
+    prompt: String, 
+    response: String, 
+    date: { type: Date, default: Date.now }
+}));
 
-// ANA SAYFA (404 HATASINI ÖNLER)
+// ANA SAYFA YÖNLENDİRMESİ: 404 hatasını engellemek için
 app.get('/', (req, res) => {
-  res.send('<h1>Yapay Zeka Botu Sunucusu Aktif!</h1>');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// YAPAY ZEKA VE MESAJLAŞMA KISMI (Burayı geri getirdik)
 app.post('/ask', async (req, res) => {
-  try {
-    const { message } = req.body;
+    try {
+        const { question } = req.body;
+        console.log("Soru Gidiyor:", question);
 
-    // Hugging Face AI İsteği
-    const response = await axios.post(
-      "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2", // Veya kullandığın model
-      { inputs: message },
-      { headers: { Authorization: `Bearer ${process.env.HUGGING_FACE_KEY}` } }
-    );
+        const response = await hf.chatCompletion({
+            model: "Qwen/Qwen2.5-7B-Instruct",
+            messages: [{ role: "user", content: question }],
+            max_tokens: 500,
+        });
 
-    const botReply = response.data[0]?.generated_text || "Bir hata oluştu.";
+        const aiResponse = response.choices[0].message.content;
 
-    // MongoDB'ye Kaydet
-    const newChat = new Chat({ 
-      userMessage: message, 
-      botResponse: botReply 
-    });
-    await newChat.save();
+        await new Chat({ prompt: question, response: aiResponse }).save();
+        res.json({ answer: aiResponse });
 
-    res.json({ response: botReply });
-  } catch (err) {
-    console.error("AI Hatası:", err.message);
-    res.status(500).json({ error: "Yapay zeka şu an cevap veremiyor." });
-  }
+    } catch (error) {
+        console.error("HATA:", error.message);
+        res.status(500).json({ answer: "Sunucu meşgul, lütfen 3 saniye sonra tekrar deneyin." });
+    }
 });
 
-// SUNUCUYU BAŞLAT
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Sunucu ${PORT} portunda yayında!`);
-   console.log("🔗 LİNK: http://localhost:3000");
-});
+// BAĞLANTI VE BAŞLATMA
+mongoose.connect(MONGODB_URI)
+    .then(() => {
+        // '0.0.0.0' eklemek Render'ın sitene dışarıdan ulaşmasını sağlar
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log("\n==========================================");
+            console.log("✅ SISTEM CALISIYOR!");
+            console.log(`🔗 RENDER LINK: https://faq-bot.onrender.com`);
+            console.log(`🏠 LOCAL LINK: http://localhost:${PORT}`);
+            console.log("==========================================\n");
+        });
+    })
+    .catch(err => console.error("MongoDB Hatası:", err));
