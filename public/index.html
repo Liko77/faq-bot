@@ -5,129 +5,136 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Ali Ahmadzada AI</title>
 <style>
-    html, body {
-        margin: 0;
-        padding: 0;
-        height: 100%;
-        width: 100%;
-        background: #000;
-        overflow: hidden;
-        font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
 
-    body {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;    /* fallback */
-        height: 100dvh;   /* dynamic viewport height */
-    }
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+}
 
-    header {
-        background: #000;
-        color: #00d4ff;
-        padding: 15px;
-        text-align: center;
-        font-size: 1.3rem;
-        font-weight: bold;
-        text-transform: uppercase;
-        border-bottom: 1px solid rgba(0, 212, 255, 0.3);
-        text-shadow: 0 0 10px #00d4ff;
-        flex-shrink: 0;
-    }
+header {
+    background: #000;
+    color: #00d4ff;
+    padding: 15px;
+    text-align: center;
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+    text-shadow: 0 0 10px #00d4ff;
+    flex-shrink: 0;
+}
 
-    #chat-box {
-        flex: 1;
-        min-height: 0; /* Flex container üçün vacib */
-        width: 100%;
-        overflow-y: auto;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        background: radial-gradient(circle at center, #000b14 0%, #000 100%);
-        -webkit-overflow-scrolling: touch;
-    }
+#chat-box {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: radial-gradient(circle at center, #000b14 0%, #000 100%);
+    -webkit-overflow-scrolling: touch;
+}
 
-    .msg {
-        max-width: 88%;
-        padding: 12px 16px;
-        border-radius: 20px;
-        font-size: 16px;
-        line-height: 1.4;
-        word-wrap: break-word;
-        animation: fadeIn 0.3s ease;
-        align-self: center; /* Mesajları ortala */
-    }
+.msg {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 20px;
+    font-size: 16px;
+    line-height: 1.4;
+    word-wrap: break-word;
+    animation: fadeIn 0.3s ease;
+}
 
-    .user-msg {
-        background: #00d4ff;
-        color: #000;
-        border-bottom-right-radius: 20px;
-        border-bottom-left-radius: 20px;
-        box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
-        font-weight: 500;
-    }
+/* Bot mesajı solda, margin ilə ekranın yanına yapışmır */
+.bot-msg { 
+    align-self: flex-start;
+    background: rgba(20, 20, 20, 0.9);
+    color: #fff;
+    border: 1.5px solid #00d4ff;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 20px;
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+    margin-right: 40px; /* sağa yapışmır */
+}
 
-    .bot-msg {
-        background: rgba(20, 20, 20, 0.9);
-        color: #fff;
-        border: 1.5px solid #00d4ff;
-        border-bottom-left-radius: 20px;
-        border-bottom-right-radius: 20px;
-        box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
-    }
+/* İstifadəçi mesajı sağda, margin ilə ekranın yanına yapışmır */
+.user-msg { 
+    align-self: flex-end;
+    background: #00d4ff;
+    color: #000;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+    font-weight: 500;
+    margin-left: 40px; /* sola yapışmır */
+}
 
-    .input-area {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        padding: 10px 15px;
-        padding-bottom: calc(10px + env(safe-area-inset-bottom));
-        border-top: 1px solid rgba(0, 212, 255, 0.2);
-        background: #000;
-        flex-shrink: 0;
-    }
+.input-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 15px;
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    background: #000;
+    border-top: 1px solid rgba(0, 212, 255, 0.2);
+    z-index: 999;
+}
 
-    input {
-        flex: 1;
-        padding: 12px 18px;
-        border-radius: 25px;
-        background: #0f0f0f;
-        border: 1px solid #00d4ff;
-        color: #fff;
-        outline: none;
-        font-size: 16px;
-        min-width: 0;
-    }
+input {
+    flex: 1;
+    padding: 12px 18px;
+    border-radius: 25px;
+    background: #0f0f0f;
+    border: 1px solid #00d4ff;
+    color: #fff;
+    outline: none;
+    font-size: 16px;
+    min-width: 0;
+}
 
-    button {
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        border: none;
-        background: #00d4ff;
-        color: #000;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 0 10px #00d4ff;
-        flex-shrink: 0;
-    }
+button {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: none;
+    background: #00d4ff;
+    color: #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px #00d4ff;
+    flex-shrink: 0;
+}
 
-    @keyframes fadeIn { 
-        from { opacity: 0; transform: translateY(5px); } 
-        to { opacity: 1; transform: translateY(0); } 
-    }
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(5px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
 
-    #chat-box::-webkit-scrollbar { width: 3px; }
-    #chat-box::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
+#chat-box::-webkit-scrollbar { width: 3px; }
+#chat-box::-webkit-scrollbar-thumb { background: #00d4ff; border-radius: 10px; }
 
-    @media (max-width: 600px) {
-        header { font-size: 1.1rem; padding: 12px; }
-        input { font-size: 15px; padding: 10px 15px; }
-        button { width: 40px; height: 40px; }
-    }
+@media (max-width: 600px) {
+    header { font-size: 1.1rem; padding: 12px; }
+    input { font-size: 15px; padding: 10px 15px; }
+    button { width: 40px; height: 40px; }
+}
 </style>
 </head>
 <body>
@@ -172,8 +179,13 @@ function scrollToBottom() {
     chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-// Mobil klaviatura açıldığında input-u görünür saxlamaq üçün
+// iPhone klaviatura açıldığında scroll-u düzəltmək
 window.addEventListener('resize', () => {
+    scrollToBottom();
+});
+
+// Başlanğıcda scroll aşağı
+window.addEventListener('load', () => {
     scrollToBottom();
 });
 </script>
