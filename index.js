@@ -28,7 +28,21 @@ app.post('/ask', async (req, res) => {
         if (lowerQuestion.includes("dünyanın") && lowerQuestion.includes("ən")  && lowerQuestion.includes("yaxşı") && lowerQuestion.includes("atası")) {
             return res.json({ answer: "Elmeddin" });
         }
-
+        if (lowerQuestion.includes("dunyanin") && lowerQuestion.includes("en")  && lowerQuestion.includes("yaxsi") && lowerQuestion.includes("atasi")) {
+            return res.json({ answer: "Elmeddin" });
+        }
+        if (lowerQuestion.includes("dunyanin") && lowerQuestion.includes("en")  && lowerQuestion.includes("yaxsi") && lowerQuestion.includes("muellimi")) {
+            return res.json({ answer: "Elmeddin" });
+        }
+         if (lowerQuestion.includes("dünyanın") && lowerQuestion.includes("ən")  && lowerQuestion.includes("yaxşı") && lowerQuestion.includes("müəllimi")) {
+            return res.json({ answer: "Elmeddin" });
+        }
+        if (lowerQuestion.includes("dunyanin") && lowerQuestion.includes("en")  && lowerQuestion.includes("yaxsi") && lowerQuestion.includes("anasi")) {
+            return res.json({ answer: "Aygun" });
+        }
+          if (lowerQuestion.includes("dünyanın") && lowerQuestion.includes("ən")  && lowerQuestion.includes("yaxşı") && lowerQuestion.includes("anası")) {
+            return res.json({ answer: "Aygun" });
+        }
         // QWEN AI CEVABI - Azerbaycan dili talimatı eklendi
         const response = await hf.chatCompletion({
             model: "Qwen/Qwen2.5-7B-Instruct",
